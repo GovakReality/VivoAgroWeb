@@ -1,11 +1,12 @@
 import { useEffect, useRef, useMemo } from 'react';
-import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
+import { CameraControls, PerspectiveCamera } from '@react-three/drei';
 import { useThree, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import gsap from 'gsap';
 import useCameraStore from '../../stores/CameraStore';
 
 const CAMERA_POSITION = [0, 1.4, 0];
+const TARGET_POSITION = [0.1, 1.406, 0];
 
 const BASE_FOV = 60;
 const REFERENCE_ASPECT = 16 / 9;
@@ -13,7 +14,7 @@ const MIN_FOV = 50;
 const MAX_FOV = 80;
 
 const Camera = () => {
-  const controlsRef = useRef();
+  const cameraControlsRef = useRef();
   const cameraRef = useRef();
   const gsapAnimationRef = useRef(null);
   const { camera } = useThree();
@@ -48,124 +49,143 @@ const Camera = () => {
 
   // Configurar posição inicial da câmera
   useEffect(() => {
-    if (controlsRef.current) {
-      camera.position.set(CAMERA_POSITION[0], CAMERA_POSITION[1], CAMERA_POSITION[2]);
-
-      controlsRef.current.target.set(
-        CAMERA_POSITION[0] + 0.1,
-        CAMERA_POSITION[1] + 0.006,
-        CAMERA_POSITION[2]
+    if (cameraControlsRef.current) {
+      cameraControlsRef.current.setLookAt(
+        CAMERA_POSITION[0], CAMERA_POSITION[1], CAMERA_POSITION[2],
+        TARGET_POSITION[0], TARGET_POSITION[1], TARGET_POSITION[2],
+        true
       );
 
-      controlsRef.current.enableZoom = false;
-      controlsRef.current.enablePan = false;
-      controlsRef.current.enableDamping = true;
-      controlsRef.current.dampingFactor = 0.1;
-      controlsRef.current.rotateSpeed = 0.25;
-
-      controlsRef.current.update();
+      cameraControlsRef.current.dollySpeed = 0; // desativar zoom
+      cameraControlsRef.current.truckSpeed = 0; // desativar pan
+      cameraControlsRef.current.verticalDragToForward = false;  // desativar movimento frente/tras
+      cameraControlsRef.current.mouseButtons.wheel = 0;   // ACTION.NONE - nada acontece com a roda
+      cameraControlsRef.current.mouseButtons.middle = 0;  // ACTION.NONE para botão do meio
+      cameraControlsRef.current.mouseButtons.right = 0;   // ACTION.NONE para botão direito     
+      cameraControlsRef.current.touches.two = 0;
+      cameraControlsRef.current.touches.three = 0;
+      cameraControlsRef.current.smoothTime = 0.1;
+      cameraControlsRef.current.draggingSmoothTime = 0.25;
+      cameraControlsRef.current.azimuthRotateSpeed = 0.25;
+      cameraControlsRef.current.polarRotateSpeed = 0.25;
+      //cameraControlsRef.current.minAzimuthAngle = -Math.PI / 2;
+      //cameraControlsRef.current.maxAzimuthAngle = Math.PI / 2;      
     }
   }, [camera]);
 
+  // Modo de visualização livre
   useEffect(() => {
-    if (controlsRef.current) {
+    if (cameraControlsRef.current) {
       if (isFreeLookMode) {
-        controlsRef.current.minDistance = 0.01;
-        controlsRef.current.maxDistance = 0.01;
-        controlsRef.current.enableRotate = true;
+        // Ativar rotação
+        cameraControlsRef.current.mouseButtons.left = 1; // CameraControls.ACTION.ROTATE
+        cameraControlsRef.current.touches.one = 1; // CameraControls.ACTION.ROTATE
+        
+        // Limites
+        cameraControlsRef.current.minDistance = 0;
+        cameraControlsRef.current.maxDistance = 0;
+        cameraControlsRef.current.minPolarAngle = Math.PI / 4;     
+        cameraControlsRef.current.maxPolarAngle = Math.PI * 3/4;   
       } else {
-        controlsRef.current.minDistance = 0;
-        controlsRef.current.maxDistance = 100;
-        controlsRef.current.enableRotate = false;
-
-        //camera.position.set(CAMERA_POSITION[0], CAMERA_POSITION[1], CAMERA_POSITION[2]);
-
-        const direction = new THREE.Vector3();
-        camera.getWorldDirection(direction);
-        const lookDistance = 10;
-        direction.multiplyScalar(lookDistance);
-        const targetPosition = camera.position.clone().add(direction);
-        controlsRef.current.target.copy(targetPosition);
+        // Desativar rotação
+        cameraControlsRef.current.mouseButtons.left = 0; // CameraControls.ACTION.NONE
+        cameraControlsRef.current.touches.one = 0; // CameraControls.ACTION.NONE
+               
+        // Remover restrições
+        cameraControlsRef.current.minDistance = 0;
+        cameraControlsRef.current.maxDistance = Infinity;
+        cameraControlsRef.current.minPolarAngle = 0;
+        cameraControlsRef.current.maxPolarAngle = Math.PI;
       }
-      controlsRef.current.update();
     }
   }, [isFreeLookMode, camera]);
 
+  function normalize(angle) {
+    return (angle + Math.PI * 2) % (Math.PI * 2);
+  }
+  
+  function computeAdjustedAzimuth(current, target) {
+    const TWO_PI = Math.PI * 2;
+    const AZIMUTH_LIMIT = Math.PI / 2;
+  
+    if (target < AZIMUTH_LIMIT) {
+      target = TWO_PI + target;
+    }
+
+    return target;
+  }
+
+  // Animação para targets específicos
   useEffect(() => {
-    if (controlsRef.current && cameraAnimate) {
-      // Interromper animação anterior se existir
+    if (cameraControlsRef.current && cameraAnimate) {
+      // Interromper animação anterior
       if (gsapAnimationRef.current) {
         gsapAnimationRef.current.kill();
       }
+  
+      // Obter a posição atual da câmera e seus ângulos
+      const cameraPosition = new THREE.Vector3();
+      camera.getWorldPosition(cameraPosition);
 
-      // Obter posição atual do target
-      const currentX = controlsRef.current.target.x;
-      const currentY = controlsRef.current.target.y;
-      const currentZ = controlsRef.current.target.z;
-      const targetY = currentTarget[1];
-
-      // Calcular ângulos para animação circular horizontal
-      const startAngle = Math.atan2(currentZ, currentX);
-      const endAngle = Math.atan2(currentTarget[2], currentTarget[0]);
-
-      // Calcular o raio atual
-      const currentRadius = Math.sqrt(currentX * currentX + currentZ * currentZ);
-
-      // Calcular o raio do target
-      const targetRadius = Math.sqrt(
-        currentTarget[0] * currentTarget[0] +
-        currentTarget[2] * currentTarget[2]
+      const currentAzimuth = cameraControlsRef.current.azimuthAngle;
+      const currentPolar = cameraControlsRef.current.polarAngle;
+  
+      const direction = new THREE.Vector3(
+        currentTarget[0] - cameraPosition.x,
+        currentTarget[1] - cameraPosition.y,
+        currentTarget[2] - cameraPosition.z
       );
 
-      // Objeto para animar o ângulo e a altura Y
-      const animObj = {
-        angle: startAngle,
-        y: currentY,
-        radius: currentRadius
+      const r = direction.length();
+      const targetPolar = normalize(Math.acos(-direction.y / r)); 
+      const targetAzimuth = Math.atan2(-direction.x, -direction.z);    
+      const finalAzimuth = computeAdjustedAzimuth(currentAzimuth, targetAzimuth);
+  
+      console.log('currentAzimuth', currentAzimuth * THREE.MathUtils.RAD2DEG);
+      console.log('targetAzimuth', finalAzimuth * THREE.MathUtils.RAD2DEG);
+
+      // Criar objeto para animar
+      const rotationObj = {
+        azimuth: currentAzimuth,
+        polar: currentPolar
       };
 
-      // Criar animação com GSAP
-      gsapAnimationRef.current = gsap.to(animObj, {
-        angle: endAngle,
-        y: targetY,
-        radius: targetRadius,
+      // Animar com GSAP
+      gsapAnimationRef.current = gsap.to(rotationObj, {
+        azimuth: finalAzimuth,
+        polar: targetPolar,
         duration: animationDuration,
         ease: "power2.inOut",
         onUpdate: () => {
-          // Calcular novas coordenadas X e Z baseadas no ângulo
-          const newX = Math.cos(animObj.angle) * animObj.radius;
-          const newZ = Math.sin(animObj.angle) * animObj.radius;
-
-          // Atualizar a posição do target
-          controlsRef.current.target.set(newX, animObj.y, newZ);
-          controlsRef.current.update();
+          // Aplicar ângulos atualizados
+          cameraControlsRef.current.rotateTo(
+            rotationObj.azimuth,
+            rotationObj.polar,
+            false
+          );
         },
         onComplete: () => {
-          controlsRef.current.target.set(
-            currentTarget[0],
-            currentTarget[1],
-            currentTarget[2]
-          );
-          controlsRef.current.update();
           finishAnimation();
         }
       });
     }
-  }, [cameraAnimate]);
+  }, [cameraAnimate, currentTarget, animationDuration, camera]);
 
-  useFrame(() => {
-    if (controlsRef.current && isFollowingTarget && !cameraAnimate) {
-      // Interpolação leve para suavizar a transição
+  // Seguir target suavemente
+/*   useFrame(() => {
+    if (cameraControlsRef.current && isFollowingTarget && !cameraAnimate) {
+      const currentTargetPos = new THREE.Vector3();
+      cameraControlsRef.current.getTarget(currentTargetPos);
+      
+      // Interpolação leve para movimento suave
       const lerpFactor = 0.02;
-
-      const targetX = controlsRef.current.target.x + (currentTarget[0] - controlsRef.current.target.x) * lerpFactor;
-      const targetY = controlsRef.current.target.y + (currentTarget[1] - controlsRef.current.target.y) * lerpFactor;
-      const targetZ = controlsRef.current.target.z + (currentTarget[2] - controlsRef.current.target.z) * lerpFactor;
-
-      controlsRef.current.target.set(targetX, targetY, targetZ);
-      controlsRef.current.update();
+      const targetX = currentTargetPos.x + (currentTarget[0] - currentTargetPos.x) * lerpFactor;
+      const targetY = currentTargetPos.y + (currentTarget[1] - currentTargetPos.y) * lerpFactor;
+      const targetZ = currentTargetPos.z + (currentTarget[2] - currentTargetPos.z) * lerpFactor;
+      
+      cameraControlsRef.current.setTarget(targetX, targetY, targetZ, true);
     }
-  });
+  }); */
 
   return (
     <>
@@ -175,10 +195,9 @@ const Camera = () => {
         fov={adjustedFOV}
       /* near={0.01} */
       />
-      <OrbitControls
-        ref={controlsRef}
+      <CameraControls
+        ref={cameraControlsRef}
         makeDefault
-        camera={camera}
       />
     </>
   );
