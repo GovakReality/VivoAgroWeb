@@ -115,9 +115,24 @@ const Camera = () => {
     return target;
   }
 
+  function calculateAnglesForTarget(target, cameraPos) {
+    const direction = new THREE.Vector3(
+      target[0] - cameraPos.x,
+      target[1] - cameraPos.y,
+      target[2] - cameraPos.z
+    );
+  
+    const r = direction.length();
+    const targetPolar = normalize(Math.acos(-direction.y / r)); 
+    const targetAzimuth = Math.atan2(-direction.x, -direction.z);
+    
+    return { azimuth: targetAzimuth, polar: targetPolar };
+  }
+
   // Animação para targets específicos
   useEffect(() => {
     if (cameraControlsRef.current && cameraAnimate) {
+      console.log('cameraAnimate', cameraAnimate);
       // Interromper animação anterior
       if (gsapAnimationRef.current) {
         gsapAnimationRef.current.kill();
@@ -129,17 +144,10 @@ const Camera = () => {
 
       const currentAzimuth = cameraControlsRef.current.azimuthAngle;
       const currentPolar = cameraControlsRef.current.polarAngle;
-  
-      const direction = new THREE.Vector3(
-        currentTarget[0] - cameraPosition.x,
-        currentTarget[1] - cameraPosition.y,
-        currentTarget[2] - cameraPosition.z
-      );
-
-      const r = direction.length();
-      const targetPolar = normalize(Math.acos(-direction.y / r)); 
-      const targetAzimuth = Math.atan2(-direction.x, -direction.z);    
-      const finalAzimuth = computeAdjustedAzimuth(currentAzimuth, targetAzimuth);
+        
+      const { azimuth: rawTargetAzimuth, polar: targetPolar } = calculateAnglesForTarget(currentTarget, cameraPosition);
+            
+      const finalAzimuth = computeAdjustedAzimuth(currentAzimuth, rawTargetAzimuth);
   
       //console.log('currentAzimuth', currentAzimuth * THREE.MathUtils.RAD2DEG);
       //console.log('targetAzimuth', finalAzimuth * THREE.MathUtils.RAD2DEG);
@@ -169,23 +177,33 @@ const Camera = () => {
         }
       });
     }
-  }, [cameraAnimate, currentTarget, animationDuration, camera]);
+  }, [cameraAnimate]);
 
   // Seguir target suavemente
   useFrame(() => {
-    console.log('isFollowingTarget', isFollowingTarget);
-    console.log('cameraControlsRef.current', cameraControlsRef.current);
-    console.log('cameraAnimate', cameraAnimate);
     if (cameraControlsRef.current && isFollowingTarget && !cameraAnimate) {
+      // Obter posição da câmera
+      const cameraPosition = new THREE.Vector3();
+      camera.getWorldPosition(cameraPosition);
       
+      // Obter ângulos atuais
+      const currentAzimuth = cameraControlsRef.current.azimuthAngle;
+      const currentPolar = cameraControlsRef.current.polarAngle;
+      
+      // Calcular ângulos alvo
+      const { azimuth: rawTargetAzimuth, polar: targetPolar } = 
+        calculateAnglesForTarget(currentTarget, cameraPosition);
+      
+      // Ajustar azimuth para rotação mais natural
+      const targetAzimuth = computeAdjustedAzimuth(currentAzimuth, rawTargetAzimuth);
+      
+      // Interpolação linear com fator de suavização
       const lerpFactor = 0.02;
-
-      const targetX = cameraControlsRef.current.target.x + (currentTarget[0] - cameraControlsRef.current.target.x) * lerpFactor;
-      const targetY = cameraControlsRef.current.target.y + (currentTarget[1] - cameraControlsRef.current.target.y) * lerpFactor;
-      const targetZ = cameraControlsRef.current.target.z + (currentTarget[2] - cameraControlsRef.current.target.z) * lerpFactor;
-
-      cameraControlsRef.current.target.set(targetX, targetY, targetZ);
-      cameraControlsRef.current.update();
+      const newAzimuth = currentAzimuth + (targetAzimuth - currentAzimuth) * lerpFactor;
+      const newPolar = currentPolar + (targetPolar - currentPolar) * lerpFactor;
+      
+      // Aplicar rotação
+      cameraControlsRef.current.rotateTo(newAzimuth, newPolar, false);
     }
   });
 

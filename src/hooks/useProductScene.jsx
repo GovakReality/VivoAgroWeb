@@ -139,8 +139,13 @@ const useProductScene = (
     if (isCurrentProduct) {
       setShowFirstInstruction(false);
       setShowFirstInteraction(false);
-
-      animateToTarget(position.map((value, index) => value + placeholderLookAtOffset[index]), 3);
+      
+      if (currentProduct === 'gestao-maquinario') {
+        animateToTarget(position.map((value, index) => value + placeholderLookAtOffset[index]), 1);
+      } else {
+        animateToTarget(position.map((value, index) => value + placeholderLookAtOffset[index]), 3);
+      }
+      
 
       timerToStartFirstAnimation(position);
       timerToStartNeonAnimation();
