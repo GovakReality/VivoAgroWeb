@@ -71,7 +71,6 @@ const GestaoPecuariaScene = () => {
     if (selectedIndex >= 0 && isCurrentProduct) {
       trackedVacaIndexRef.current = selectedIndex;
       isTrackingEnabledRef.current = true;
-      console.log('start PECUARIA');
       startFollowingTarget();
 
       if (vacaPositionsRef.current[selectedIndex]) {
@@ -93,7 +92,6 @@ const GestaoPecuariaScene = () => {
   useEffect(() => {
     if (animateTablet) {
       isTrackingEnabledRef.current = false;
-      console.log('sstop PECUARIA');
       stopFollowingTarget();
     } 
   }, [animateTablet, stopFollowingTarget]);

@@ -167,8 +167,8 @@ const Camera = () => {
         currentTarget
       );
   
-      //console.log('currentAzimuth', currentAzimuth * THREE.MathUtils.RAD2DEG);
-      //console.log('targetAzimuth', finalAzimuth * THREE.MathUtils.RAD2DEG);
+      //console.log('currentAzimuth', current.azimuth * THREE.MathUtils.RAD2DEG);
+      //console.log('targetAzimuth', target.azimuth * THREE.MathUtils.RAD2DEG);
 
       // Criar objeto para animar
       const rotationObj = {
