@@ -129,6 +129,29 @@ const Camera = () => {
     return { azimuth: targetAzimuth, polar: targetPolar };
   }
 
+  function calculateTargetAngles(camera, cameraControlsRef, currentTarget) {
+    // Obter posição da câmera
+    const cameraPosition = new THREE.Vector3();
+    camera.getWorldPosition(cameraPosition);
+    
+    // Obter ângulos atuais
+    const currentAzimuth = cameraControlsRef.current.azimuthAngle;
+    const currentPolar = cameraControlsRef.current.polarAngle;
+    
+    // Calcular ângulos alvo
+    const { azimuth: rawTargetAzimuth, polar: targetPolar } = 
+      calculateAnglesForTarget(currentTarget, cameraPosition);
+    
+    // Ajustar azimuth para rotação mais natural
+    const targetAzimuth = computeAdjustedAzimuth(currentAzimuth, rawTargetAzimuth);
+    
+    return {
+      current: { azimuth: currentAzimuth, polar: currentPolar },
+      target: { azimuth: targetAzimuth, polar: targetPolar },
+      cameraPosition
+    };
+  }
+
   // Animação para targets específicos
   useEffect(() => {
     if (cameraControlsRef.current && cameraAnimate) {
@@ -138,34 +161,28 @@ const Camera = () => {
         gsapAnimationRef.current.kill();
       }
   
-      // Obter a posição atual da câmera e seus ângulos
-      const cameraPosition = new THREE.Vector3();
-      camera.getWorldPosition(cameraPosition);
-
-      const currentAzimuth = cameraControlsRef.current.azimuthAngle;
-      const currentPolar = cameraControlsRef.current.polarAngle;
-        
-      const { azimuth: rawTargetAzimuth, polar: targetPolar } = calculateAnglesForTarget(currentTarget, cameraPosition);
-            
-      const finalAzimuth = computeAdjustedAzimuth(currentAzimuth, rawTargetAzimuth);
+      const { current, target } = calculateTargetAngles(
+        camera, 
+        cameraControlsRef, 
+        currentTarget
+      );
   
       //console.log('currentAzimuth', currentAzimuth * THREE.MathUtils.RAD2DEG);
       //console.log('targetAzimuth', finalAzimuth * THREE.MathUtils.RAD2DEG);
 
       // Criar objeto para animar
       const rotationObj = {
-        azimuth: currentAzimuth,
-        polar: currentPolar
-      };
+        azimuth: current.azimuth,
+        polar: current.polar
+      };  
 
       // Animar com GSAP
       gsapAnimationRef.current = gsap.to(rotationObj, {
-        azimuth: finalAzimuth,
-        polar: targetPolar,
+        azimuth: target.azimuth,
+        polar: target.polar,
         duration: animationDuration,
         ease: "power2.inOut",
         onUpdate: () => {
-          // Aplicar ângulos atualizados
           cameraControlsRef.current.rotateTo(
             rotationObj.azimuth,
             rotationObj.polar,
@@ -182,25 +199,17 @@ const Camera = () => {
   // Seguir target suavemente
   useFrame(() => {
     if (cameraControlsRef.current && isFollowingTarget && !cameraAnimate) {
-      // Obter posição da câmera
-      const cameraPosition = new THREE.Vector3();
-      camera.getWorldPosition(cameraPosition);
-      
-      // Obter ângulos atuais
-      const currentAzimuth = cameraControlsRef.current.azimuthAngle;
-      const currentPolar = cameraControlsRef.current.polarAngle;
-      
-      // Calcular ângulos alvo
-      const { azimuth: rawTargetAzimuth, polar: targetPolar } = 
-        calculateAnglesForTarget(currentTarget, cameraPosition);
-      
-      // Ajustar azimuth para rotação mais natural
-      const targetAzimuth = computeAdjustedAzimuth(currentAzimuth, rawTargetAzimuth);
+
+      const { current, target } = calculateTargetAngles(
+        camera, 
+        cameraControlsRef, 
+        currentTarget
+      );
       
       // Interpolação linear com fator de suavização
       const lerpFactor = 0.02;
-      const newAzimuth = currentAzimuth + (targetAzimuth - currentAzimuth) * lerpFactor;
-      const newPolar = currentPolar + (targetPolar - currentPolar) * lerpFactor;
+      const newAzimuth = current.azimuth + (target.azimuth - current.azimuth) * lerpFactor;
+      const newPolar = current.polar + (target.polar - current.polar) * lerpFactor;
       
       // Aplicar rotação
       cameraControlsRef.current.rotateTo(newAzimuth, newPolar, false);
