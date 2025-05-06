@@ -6,7 +6,7 @@ import gsap from 'gsap';
 import useCameraStore from '../../stores/CameraStore';
 
 const CAMERA_POSITION = [0, 1.4, 0];
-const TARGET_POSITION = [0.1, 1.406, 0];
+const TARGET_POSITION = [0.1, 1.4, 0];
 
 const BASE_FOV = 60;
 const REFERENCE_ASPECT = 16 / 9;
@@ -141,8 +141,8 @@ const Camera = () => {
       const targetAzimuth = Math.atan2(-direction.x, -direction.z);    
       const finalAzimuth = computeAdjustedAzimuth(currentAzimuth, targetAzimuth);
   
-      console.log('currentAzimuth', currentAzimuth * THREE.MathUtils.RAD2DEG);
-      console.log('targetAzimuth', finalAzimuth * THREE.MathUtils.RAD2DEG);
+      //console.log('currentAzimuth', currentAzimuth * THREE.MathUtils.RAD2DEG);
+      //console.log('targetAzimuth', finalAzimuth * THREE.MathUtils.RAD2DEG);
 
       // Criar objeto para animar
       const rotationObj = {
@@ -172,20 +172,22 @@ const Camera = () => {
   }, [cameraAnimate, currentTarget, animationDuration, camera]);
 
   // Seguir target suavemente
-/*   useFrame(() => {
+  useFrame(() => {
+    console.log('isFollowingTarget', isFollowingTarget);
+    console.log('cameraControlsRef.current', cameraControlsRef.current);
+    console.log('cameraAnimate', cameraAnimate);
     if (cameraControlsRef.current && isFollowingTarget && !cameraAnimate) {
-      const currentTargetPos = new THREE.Vector3();
-      cameraControlsRef.current.getTarget(currentTargetPos);
       
-      // Interpolação leve para movimento suave
       const lerpFactor = 0.02;
-      const targetX = currentTargetPos.x + (currentTarget[0] - currentTargetPos.x) * lerpFactor;
-      const targetY = currentTargetPos.y + (currentTarget[1] - currentTargetPos.y) * lerpFactor;
-      const targetZ = currentTargetPos.z + (currentTarget[2] - currentTargetPos.z) * lerpFactor;
-      
-      cameraControlsRef.current.setTarget(targetX, targetY, targetZ, true);
+
+      const targetX = cameraControlsRef.current.target.x + (currentTarget[0] - cameraControlsRef.current.target.x) * lerpFactor;
+      const targetY = cameraControlsRef.current.target.y + (currentTarget[1] - cameraControlsRef.current.target.y) * lerpFactor;
+      const targetZ = cameraControlsRef.current.target.z + (currentTarget[2] - cameraControlsRef.current.target.z) * lerpFactor;
+
+      cameraControlsRef.current.target.set(targetX, targetY, targetZ);
+      cameraControlsRef.current.update();
     }
-  }); */
+  });
 
   return (
     <>
