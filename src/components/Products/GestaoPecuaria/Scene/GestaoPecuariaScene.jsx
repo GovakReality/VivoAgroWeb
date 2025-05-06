@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Placeholders from '../../../Commons/Scene/Placeholders/Placeholders';
 import useProductScene from '../../../../hooks/useProductScene';
+import useCameraStore from '../../../../stores/CameraStore';
 import Vacas from '../../../Scene/Objects/Experiencia/Products/GestaoPecuaria/Vacas';
 import DispositivosPecuaria from '../../../Scene/Objects/Experiencia/Products/GestaoPecuaria/DispositivosPecuaria';
 import Brinco from '../../../Scene/Objects/Experiencia/Products/GestaoPecuaria/Brinco';
@@ -58,6 +59,8 @@ const GestaoPecuariaScene = () => {
 
   const vacaPositionsRef = useRef(INITIAL_PLACEHOLDER_POSITIONS);
   const trackedVacaIndexRef = useRef(-1);
+  const isTrackingEnabledRef = useRef(false);
+  const { setCurrentTarget, stopFollowingTarget, startFollowingTarget } = useCameraStore();
 
   const [dispositivoPosition, setDispositivoPosition] = useState(selectedPosition);
   const [placeholderPositions, setPlaceholderPositions] = useState(INITIAL_PLACEHOLDER_POSITIONS);
@@ -67,6 +70,10 @@ const GestaoPecuariaScene = () => {
   useEffect(() => {
     if (selectedIndex >= 0 && isCurrentProduct) {
       trackedVacaIndexRef.current = selectedIndex;
+      isTrackingEnabledRef.current = true;
+      console.log('start PECUARIA');
+      startFollowingTarget();
+
       if (vacaPositionsRef.current[selectedIndex]) {
         setDispositivoPosition(vacaPositionsRef.current[selectedIndex]);
       }
@@ -82,6 +89,14 @@ const GestaoPecuariaScene = () => {
         break;
     }
   }, [selectedIndex, isCurrentProduct]);
+
+  useEffect(() => {
+    if (animateTablet) {
+      isTrackingEnabledRef.current = false;
+      console.log('sstop PECUARIA');
+      stopFollowingTarget();
+    } 
+  }, [animateTablet, stopFollowingTarget]);
 
   useEffect(() => {
     if (shouldSkipProduct && isCurrentProduct) {
@@ -100,10 +115,21 @@ const GestaoPecuariaScene = () => {
         }
         return newPositions;
       });
+
       // Atualizar a posição do dispositivo
       if (shouldRenderMainObject && trackedVacaIndexRef.current === vacaIndex) {
         setDispositivoPosition([position.x, position.y, position.z]);
       }
+
+      // Atualizar posiçao do target da camera
+      if (isTrackingEnabledRef.current && isCurrentProduct && trackedVacaIndexRef.current === vacaIndex) {
+        const targetPosition = [
+          position.x + PLACEHOLDER_LOOKAT_OFFSET[0],
+          position.y + PLACEHOLDER_LOOKAT_OFFSET[1],
+          position.z + PLACEHOLDER_LOOKAT_OFFSET[2]
+        ];
+        setCurrentTarget(targetPosition);
+      }      
     }
   };
 

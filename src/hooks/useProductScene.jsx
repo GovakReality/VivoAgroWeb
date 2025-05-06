@@ -140,7 +140,7 @@ const useProductScene = (
       setShowFirstInstruction(false);
       setShowFirstInteraction(false);
       
-      if (currentProduct === 'gestao-maquinario') {
+      if (currentProduct === 'gestao-maquinario' || currentProduct === 'gestao-pecuaria') {
         animateToTarget(position.map((value, index) => value + placeholderLookAtOffset[index]), 1);
       } else {
         animateToTarget(position.map((value, index) => value + placeholderLookAtOffset[index]), 3);

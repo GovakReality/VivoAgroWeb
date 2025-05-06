@@ -70,6 +70,7 @@ const GestaoMaquinarioScene = () => {
     if (selectedIndex >= 0 && isCurrentProduct) {
       trackedTratorIndexRef.current = selectedIndex;
       isTrackingEnabledRef.current = true;
+      console.log('start MAQUINARIO');
       startFollowingTarget();
 
       if (tratorPositionsRef.current[selectedIndex]) {
@@ -93,13 +94,12 @@ const GestaoMaquinarioScene = () => {
   }, [selectedIndex, isCurrentProduct]);
 
   useEffect(() => {
-    if (animateTablet || !isCurrentProduct) {
+    if (animateTablet) {
       isTrackingEnabledRef.current = false;
+      console.log('stop MAQUINARIO');
       stopFollowingTarget();
-    } else if (selectedIndex >= 0) {
-      isTrackingEnabledRef.current = true;
     }
-  }, [animateTablet, isCurrentProduct, stopFollowingTarget, selectedIndex]);
+  }, [animateTablet, stopFollowingTarget]);
 
   useEffect(() => {
     if (shouldSkipProduct && isCurrentProduct) {

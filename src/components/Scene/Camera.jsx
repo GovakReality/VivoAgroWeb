@@ -155,7 +155,7 @@ const Camera = () => {
   // Animação para targets específicos
   useEffect(() => {
     if (cameraControlsRef.current && cameraAnimate) {
-      console.log('cameraAnimate', cameraAnimate);
+
       // Interromper animação anterior
       if (gsapAnimationRef.current) {
         gsapAnimationRef.current.kill();
@@ -199,7 +199,6 @@ const Camera = () => {
   // Seguir target suavemente
   useFrame(() => {
     if (cameraControlsRef.current && isFollowingTarget && !cameraAnimate) {
-
       const { current, target } = calculateTargetAngles(
         camera, 
         cameraControlsRef, 
