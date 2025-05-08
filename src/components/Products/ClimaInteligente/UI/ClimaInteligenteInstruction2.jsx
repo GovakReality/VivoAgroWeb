@@ -5,8 +5,8 @@ const ClimaInteligenteInstruction2 = ({ isVisible }) => {
   return (
     <InstructionWithTimer
       isVisible={isVisible}
-      title="Estamos iniciando sua estação meteorológica"
-      description="Você logo terá acesso aos dados climáticos da sua fazenda."
+      title=""
+      description="Estamos iniciando a sua estação meteorológica para que tenha acesso aos dados climáticos da sua fazenda."
       duration={4}
     />
   );

@@ -5,8 +5,8 @@ const GestaoPecuariaInstruction2 = ({ isVisible }) => {
   return (
     <InstructionWithTimer
       isVisible={isVisible}
-      title="Estamos ativando o monitoramento"
-      description="Você logo poderá acompanhar os dados de saúde de seus animais."
+      title=""
+      description="Estamos ativando o monitoramento para que tenha acesso aos dados dos seus animais."
       duration={4}
     />
   );
