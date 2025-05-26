@@ -112,7 +112,7 @@ const Trator = forwardRef(({ path, position, rotation, scale, volume = 0.5, anim
       play('TratorVFX-Crescendo');  //conferir nome da animaçao - scale in VFX
       play('TratorVFX-Loop', {         //conferir nome da animaçao - loop VFX
         loop: true,
-        timeScale: 1.0,
+        timeScale: 0.1,
       });
     }
   }, [skipProduct, play, jumpToEnd]);
