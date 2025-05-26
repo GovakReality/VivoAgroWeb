@@ -73,10 +73,10 @@ const assets = {
     '/ui/gestaoPecuaria.jpg'
   ],
   videos: [
-    '/videos/TabletAgroCobertura.mp4',
-    '/videos/TabletGestaoMaquinario.mp4',
-    '/videos/TabletGestaoPecuaria.mp4',
-    '/videos/TabletClimaInteligente.mp4'
+    '/videos/Tablet-AgroCobertura.mp4',
+    '/videos/Tablet-GestaoMaquinario.mp4',
+    '/videos/Tablet-GestaoPecuaria.mp4',
+    '/videos/Tablet-ClimaInteligente.mp4'
   ],
   sounds: {
     // Interface
