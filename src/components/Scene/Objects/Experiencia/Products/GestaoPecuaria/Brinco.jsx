@@ -6,7 +6,7 @@ const MODEL_PATH = '/models/products/GestaoPecuaria/Brinco.glb';
 const Brinco = ({ position, rotation = [2, 0.7, 0.4], scale = 1.1, playSecondAnimation = false, skipProduct = false }) => {
   const meshRef = useRef();
   const { scene, play, jumpToEnd } = useGLTFAnimations(MODEL_PATH, {
-    cloneScene: false,
+    cloneScene: true,
   });
 
   useEffect(() => {
