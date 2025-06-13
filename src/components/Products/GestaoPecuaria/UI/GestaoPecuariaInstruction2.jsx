@@ -6,7 +6,7 @@ const GestaoPecuariaInstruction2 = ({ isVisible }) => {
     <InstructionWithTimer
       isVisible={isVisible}
       title=""
-      description="Estamos ativando o monitoramento para que tenha acesso aos dados dos seus animais."
+      description="Estamos ativando o monitoramento para que você tenha acesso aos dados dos seus animais."
       duration={4}
     />
   );
