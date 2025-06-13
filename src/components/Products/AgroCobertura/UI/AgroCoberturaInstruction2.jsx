@@ -6,7 +6,7 @@ const AgroCoberturaInstruction2 = ({ isVisible }) => {
     <InstructionWithTimer
       isVisible={isVisible}
       title=""
-      description="Estamos ativando sua antena para ter acesso às novas tecnologias na sua fazenda."
+      description="Estamos ativando sua antena para que você tenha acesso às novas tecnologias na sua fazenda."
       duration={4}
     />
   );

@@ -67,6 +67,7 @@ const GestaoPecuariaScene = () => {
   const [placeholderPositions, setPlaceholderPositions] = useState(INITIAL_PLACEHOLDER_POSITIONS);
   const [neonPosition, setNeonPosition] = useState(false);
   const [neonRotation, setNeonRotation] = useState(false);
+  const [allVacaPositions, setAllVacaPositions] = useState([null, null]);
 
   useEffect(() => {
     if (selectedIndex >= 0 && isCurrentProduct) {
@@ -77,6 +78,17 @@ const GestaoPecuariaScene = () => {
       if (vacaPositionsRef.current[selectedIndex]) {
         setDispositivoPosition(vacaPositionsRef.current[selectedIndex]);
       }
+
+      // Garantir que todas as posições conhecidas sejam adicionadas ao estado
+      const currentPositions = [null, null];
+      
+      vacaPositionsRef.current.forEach((pos, index) => {
+        if (pos) {
+          currentPositions[index] = pos;
+        }
+      });
+      
+      setAllVacaPositions(currentPositions);
     }
     switch (selectedIndex) {
       case 0:
@@ -106,6 +118,14 @@ const GestaoPecuariaScene = () => {
   const handleObjectPositionUpdate = (position, vacaIndex) => {
     if (position) {
       vacaPositionsRef.current[vacaIndex] = [position.x, position.y, position.z];
+
+      // Atualizar as posições de todas as vacas
+      setAllVacaPositions(prevPositions => {
+        const newPositions = [...prevPositions];
+        newPositions[vacaIndex] = [position.x, position.y, position.z];
+        return newPositions;
+      });
+
       // Atualizar os placeholders
       setPlaceholderPositions(prevPositions => {
         const newPositions = [...prevPositions];
@@ -145,12 +165,19 @@ const GestaoPecuariaScene = () => {
         <PecuariaNeon position={neonPosition} rotation={neonRotation} onAnimationEnd={() => setShouldRenderNeon(false)} />
       )}
 
-      {shouldRenderMainObject && dispositivoPosition && trackedVacaIndexRef.current >= 0 && (
-        <Brinco
-          position={dispositivoPosition}
-          playSecondAnimation={shouldPlaySecondAnimation}
-          skipProduct={shouldSkipProduct}
-        />
+      {shouldRenderMainObject && (
+        <>
+          {allVacaPositions.map((position, index) => {
+            return position && (
+              <Brinco
+                key={`brinco-${index}`}
+                position={position}
+                playSecondAnimation={shouldPlaySecondAnimation}
+                skipProduct={shouldSkipProduct}
+              />
+            );
+          })}
+        </>
       )}
 
       {shouldRenderPlaceholders && (
