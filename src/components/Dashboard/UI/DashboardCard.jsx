@@ -38,10 +38,12 @@ const DashboardCard = ({ isVisible = true, onAnimationOutEnded, onResetClick }) 
 
   const handleProductClick = useCallback((productName) => {
     setShowDashboard(false);
+    // Delay menor para clima inteligente
+    const delay = productName === 'clima-inteligente' ? 50 : ANIMATION_DURATIONS.DASHBOARD.SCALE_OUT;
     const timer = setTimeout(() => {
       setCurrentProduct(productName);
       setStartProduct(true);
-    }, ANIMATION_DURATIONS.DASHBOARD.SCALE_OUT);
+    }, delay);
   }, []);
 
   const handleResetClick = useCallback(() => {
