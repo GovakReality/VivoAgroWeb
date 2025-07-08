@@ -27,13 +27,13 @@ const productRegistry = {
       second: GestaoMaquinarioInstruction2
     }
   },
-  'gestao-pecuaria': {
-    card: GestaoPecuariaCard,
-    instructions: {
-      first: GestaoPecuariaInstruction1,
-      second: GestaoPecuariaInstruction2
-    }
-  },
+  // 'gestao-pecuaria': {
+  //   card: GestaoPecuariaCard,
+  //   instructions: {
+  //     first: GestaoPecuariaInstruction1,
+  //     second: GestaoPecuariaInstruction2
+  //   }
+  // },
   'clima-inteligente': {
     card: ClimaInteligenteCard,
     instructions: {
