@@ -4,6 +4,7 @@ import AgroCoberturaScene from '../../Products/AgroCobertura/Scene/AgroCobertura
 import GestaoMaquinarioScene from '../../Products/GestaoMaquinario/Scene/GestaoMaquinarioScene';
 import GestaoPecuariaScene from '../../Products/GestaoPecuaria/Scene/GestaoPecuariaScene';
 import ClimaInteligenteScene from '../../Products/ClimaInteligente/Scene/ClimaInteligenteScene';
+import Vacas from '../../Scene/Objects/Experiencia/Products/GestaoPecuaria/Vacas';
 
 const Experiencia = () => {
 
@@ -13,7 +14,9 @@ const Experiencia = () => {
       <AgroCoberturaScene />
       <GestaoMaquinarioScene />
       <ClimaInteligenteScene />
-      <GestaoPecuariaScene />
+      {/* Desativando Gestão Pecuária mas mantendo as vacas */}
+      {/* <GestaoPecuariaScene /> */}
+      <Vacas />
     </group>
   );
 };
