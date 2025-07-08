@@ -67,7 +67,7 @@ const DashboardCard = ({ isVisible = true, onAnimationOutEnded, onResetClick }) 
       <div className="main-buttons">
         <ImageButton status={productsStatus['agro-cobertura']} title="AGRO COBERTURA" onClick={() => handleProductClick('agro-cobertura')} imageUrl="/ui/agroCobertura.jpg" />
         <ImageButton status={productsStatus['gestao-maquinario']} title="GESTÃO DE MAQUINÁRIO" onClick={() => handleProductClick('gestao-maquinario')} imageUrl="/ui/gestaoMaquinario.jpg" />
-        <ImageButton status={productsStatus['gestao-pecuaria']} title="GESTÃO PECUÁRIA" onClick={() => handleProductClick('gestao-pecuaria')} imageUrl="/ui/gestaoPecuaria.jpg" />
+        {/* <ImageButton status={productsStatus['gestao-pecuaria']} title="GESTÃO PECUÁRIA" onClick={() => handleProductClick('gestao-pecuaria')} imageUrl="/ui/gestaoPecuaria.jpg" /> */}
         <ImageButton status={productsStatus['clima-inteligente']} title="CLIMA INTELIGENTE" onClick={() => handleProductClick('clima-inteligente')} imageUrl="/ui/climaInteligente.jpg" />
       </div>
     </div>
