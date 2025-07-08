@@ -4,11 +4,12 @@ const productsStore = (set, get) => ({
   startProduct: false,
   currentProduct: 'agro-cobertura',
   lastProductName: 'agro-cobertura',
-  productsOrder: ['agro-cobertura', 'gestao-maquinario', 'gestao-pecuaria', 'clima-inteligente'],
+  // productsOrder: ['agro-cobertura', 'gestao-maquinario', 'gestao-pecuaria', 'clima-inteligente'],
+  productsOrder: ['agro-cobertura', 'gestao-maquinario', 'clima-inteligente'],
   productsStatus: {
     'agro-cobertura': 'completed',
     'gestao-maquinario': 'unlocked',
-    'gestao-pecuaria': 'locked',
+    // 'gestao-pecuaria': 'locked',
     'clima-inteligente': 'locked',
   },
   skipProduct: false,
@@ -25,7 +26,7 @@ const productsStore = (set, get) => ({
   unlockNextProduct: (productName) => {
     const state = get();
     const { productsOrder, productsStatus } = state;
-    
+
     const currentIndex = productsOrder.indexOf(productName);
     if (currentIndex !== -1 && currentIndex < productsOrder.length - 1) {
       const nextProduct = productsOrder[currentIndex + 1];
@@ -40,7 +41,7 @@ const productsStore = (set, get) => ({
     const state = get();
     state.setProductStatus(productName, 'completed');
     state.unlockNextProduct(productName);
-  }  
+  }
 });
 
 const useProductsStore = create(productsStore);
